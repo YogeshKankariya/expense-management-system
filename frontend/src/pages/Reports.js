@@ -32,27 +32,41 @@ const formatDate = (dateStr) => {
   });
 };
 
-const CATEGORY_COLORS = {
-  Food: "#f59e0b",
-  Transport: "#3b82f6",
-  Shopping: "#ec4899",
-  Bills: "#ef4444",
-  Education: "#8b5cf6",
-  Entertainment: "#10b981",
-  Healthcare: "#06b6d4",
-  Other: "#6b7280",
+const CATEGORY_META = {
+  Food: { icon: "🍔", color: "#f59e0b", bg: "#fef3c7" },
+  Transport: { icon: "🚌", color: "#3b82f6", bg: "#dbeafe" },
+  Shopping: { icon: "🛍️", color: "#ec4899", bg: "#fce7f3" },
+  Bills: { icon: "💡", color: "#ef4444", bg: "#fee2e2" },
+  Education: { icon: "📚", color: "#8b5cf6", bg: "#ede9fe" },
+  Entertainment: { icon: "🎬", color: "#10b981", bg: "#d1fae5" },
+  Healthcare: { icon: "🏥", color: "#06b6d4", bg: "#cffafe" },
+  Other: { icon: "📦", color: "#64748b", bg: "#f1f5f9" },
 };
 
 const PALETTE = [
-  "#0f4c81",
-  "#1a7a4a",
+  "#4f46e5",
+  "#10b981",
   "#f59e0b",
   "#ec4899",
   "#8b5cf6",
   "#06b6d4",
   "#ef4444",
-  "#6b7280",
+  "#64748b",
 ];
+
+// Custom Chart Tooltip
+const CustomChartTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="custom-chart-tooltip">
+        <p className="tooltip-title">{label || data.name}</p>
+        <p className="tooltip-value">{formatAmount(data.value)}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -176,40 +190,75 @@ const Reports = () => {
   }, [expenses]);
 
   return (
-    <div className="reports-page">
+    <div className="reports-page-container">
       {/* Header */}
-      <div className="page-header">
+      <div className="reports-header">
         <div>
-          <h1 className="page-title">Expense Reports</h1>
+          <h1 className="page-title">Reports & Analytics</h1>
           <p className="page-subtitle">
-            Comprehensive analytics and insights into your spending habits
+            Comprehensive financial insights, category distribution, and spending trends
           </p>
         </div>
-        <Link to="/expenses" className="btn btn-outline">
-          Manage Expenses
+        <Link to="/expenses" className="btn btn-secondary">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+          <span>Manage Expenses</span>
         </Link>
       </div>
 
-      {error && <p className="alert alert-error">{error}</p>}
+      {error && (
+        <div className="alert alert-error" role="alert">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Loading State */}
       {loading && (
-        <div className="loading-state">
+        <div className="loading-state-card">
           <div className="spinner" />
-          <p>Generating reports...</p>
+          <p>Generating financial reports and computing analytics...</p>
         </div>
       )}
 
       {/* Empty State */}
       {!loading && !error && expenses.length === 0 && (
-        <div className="empty-state">
-          <span className="empty-icon">📊</span>
-          <h2>No expenses available to generate reports.</h2>
-          <p>
-            Start adding your daily expenses to see analytics, category breakdowns,
-            and monthly trends.
+        <div className="empty-state-card">
+          <div className="empty-icon-circle">📊</div>
+          <h2 className="empty-title">No expenses available to generate reports.</h2>
+          <p className="empty-subtitle">
+            Log your daily expenses to view analytical charts, category breakdowns,
+            and monthly financial summaries.
           </p>
-          <Link to="/expenses" className="btn btn-primary" state={{ openAdd: true }}>
+          <Link
+            to="/expenses"
+            className="btn btn-primary"
+            state={{ openAdd: true }}
+          >
             + Add First Expense
           </Link>
         </div>
@@ -218,113 +267,191 @@ const Reports = () => {
       {/* Main Content when expenses exist */}
       {!loading && expenses.length > 0 && (
         <>
-          {/* 1. Report Summary Cards */}
-          <div className="report-summary-grid">
-            <div className="report-summary-card">
-              <span className="report-stat-icon">💰</span>
-              <div>
-                <p className="report-stat-label">Total Spending</p>
-                <h3 className="report-stat-value">{formatAmount(totalSpending)}</h3>
-                <p className="report-stat-sub">Across all categories</p>
+          {/* 1. Report Summary Cards (5 Metrics) */}
+          <div className="reports-metrics-grid">
+            {/* Total Spending */}
+            <div className="report-metric-card">
+              <div className="report-metric-icon-wrap icon-indigo">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="2" y="4" width="20" height="16" rx="4" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+              </div>
+              <div className="report-metric-info">
+                <span className="report-metric-label">Total Spending</span>
+                <span className="report-metric-value">
+                  {formatAmount(totalSpending)}
+                </span>
+                <span className="report-metric-sub">Across all categories</span>
               </div>
             </div>
 
-            <div className="report-summary-card">
-              <span className="report-stat-icon">📊</span>
-              <div>
-                <p className="report-stat-label">Average Expense</p>
-                <h3 className="report-stat-value">{formatAmount(averageExpense)}</h3>
-                <p className="report-stat-sub">Per transaction</p>
+            {/* Average Expense */}
+            <div className="report-metric-card">
+              <div className="report-metric-icon-wrap icon-emerald">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+              <div className="report-metric-info">
+                <span className="report-metric-label">Average Expense</span>
+                <span className="report-metric-value">
+                  {formatAmount(averageExpense)}
+                </span>
+                <span className="report-metric-sub">Per transaction</span>
               </div>
             </div>
 
-            <div className="report-summary-card">
-              <span className="report-stat-icon">🏆</span>
-              <div>
-                <p className="report-stat-label">Highest Expense</p>
-                <h3 className="report-stat-value">
+            {/* Highest Expense */}
+            <div className="report-metric-card">
+              <div className="report-metric-icon-wrap icon-amber">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+              <div className="report-metric-info">
+                <span className="report-metric-label">Highest Expense</span>
+                <span className="report-metric-value">
                   {highestExpense ? formatAmount(highestExpense.amount) : "₹0"}
-                </h3>
-                <p className="report-stat-sub">
+                </span>
+                <span className="report-metric-sub" title={highestExpense?.title}>
                   {highestExpense ? highestExpense.title : "None"}
-                </p>
+                </span>
               </div>
             </div>
 
-            <div className="report-summary-card">
-              <span className="report-stat-icon">⭐</span>
-              <div>
-                <p className="report-stat-label">Most Used Category</p>
-                <h3 className="report-stat-value">
+            {/* Most Used Category */}
+            <div className="report-metric-card">
+              <div className="report-metric-icon-wrap icon-purple">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                  <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+              </div>
+              <div className="report-metric-info">
+                <span className="report-metric-label">Top Category</span>
+                <span className="report-metric-value">
                   {mostUsedCategory ? mostUsedCategory.category : "None"}
-                </h3>
-                <p className="report-stat-sub">
+                </span>
+                <span className="report-metric-sub">
                   {mostUsedCategory
                     ? `${mostUsedCategory.count} ${
                         mostUsedCategory.count === 1 ? "expense" : "expenses"
                       }`
                     : "No data"}
-                </p>
+                </span>
               </div>
             </div>
 
-            <div className="report-summary-card">
-              <span className="report-stat-icon">🧾</span>
-              <div>
-                <p className="report-stat-label">Number of Expenses</p>
-                <h3 className="report-stat-value">{numberOfExpenses}</h3>
-                <p className="report-stat-sub">Total recorded</p>
+            {/* Total Count */}
+            <div className="report-metric-card">
+              <div className="report-metric-icon-wrap icon-sky">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+              </div>
+              <div className="report-metric-info">
+                <span className="report-metric-label">Transactions</span>
+                <span className="report-metric-value">{numberOfExpenses}</span>
+                <span className="report-metric-sub">Total recorded</span>
               </div>
             </div>
           </div>
 
-          {/* 2. Category Report */}
-          <div className="report-section">
-            <h2 className="section-title">Category Report</h2>
-            <p className="section-subtitle">
-              Breakdown of spending and transaction volume per category
-            </p>
+          {/* 2. Category Report (Table + Pie Chart) */}
+          <div className="report-section-card">
+            <div className="report-section-header">
+              <div>
+                <h2 className="section-title">Category Report</h2>
+                <p className="section-subtitle">
+                  Breakdown of total spending and transaction count across categories
+                </p>
+              </div>
+            </div>
 
-            <div className="report-two-col">
-              {/* Category Table */}
-              <div className="table-responsive">
-                <table className="report-table">
+            <div className="report-split-grid">
+              {/* Category Breakdown Table */}
+              <div className="report-table-wrapper">
+                <table className="saas-table">
                   <thead>
                     <tr>
                       <th>Category</th>
-                      <th className="text-center">Number of Expenses</th>
-                      <th className="text-right">Total Amount</th>
+                      <th className="text-center">Count</th>
+                      <th className="text-right">Total Spent</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {categoryReport.map((cat, idx) => (
-                      <tr key={cat.category}>
-                        <td>
-                          <span
-                            className="color-dot"
-                            style={{
-                              backgroundColor:
-                                CATEGORY_COLORS[cat.category] ||
-                                PALETTE[idx % PALETTE.length],
-                            }}
-                          />
-                          <strong>{cat.category}</strong>
-                        </td>
-                        <td className="text-center">
-                          {cat.count} {cat.count === 1 ? "expense" : "expenses"}
-                        </td>
-                        <td className="text-right font-bold">
-                          {formatAmount(cat.totalAmount)}
-                        </td>
-                      </tr>
-                    ))}
+                    {categoryReport.map((cat, idx) => {
+                      const meta = CATEGORY_META[cat.category] || CATEGORY_META.Other;
+                      return (
+                        <tr key={cat.category}>
+                          <td>
+                            <div className="category-cell">
+                              <span
+                                className="category-color-dot"
+                                style={{
+                                  backgroundColor:
+                                    meta.color || PALETTE[idx % PALETTE.length],
+                                }}
+                              />
+                              <span className="category-name font-semibold">
+                                {cat.category}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="text-center text-muted">
+                            {cat.count} {cat.count === 1 ? "expense" : "expenses"}
+                          </td>
+                          <td className="text-right font-bold">
+                            {formatAmount(cat.totalAmount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
-              {/* Category Visualization */}
+              {/* Category Donut / Pie Chart */}
               <div className="report-chart-box">
-                <h4 className="chart-box-title">Category Distribution</h4>
+                <h3 className="chart-box-title">Distribution Overview</h3>
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
                     <Pie
@@ -333,28 +460,29 @@ const Reports = () => {
                       nameKey="category"
                       cx="50%"
                       cy="45%"
-                      outerRadius={75}
-                      innerRadius={35}
+                      innerRadius={45}
+                      outerRadius={80}
                       paddingAngle={3}
                     >
                       {categoryReport.map((entry, idx) => (
                         <Cell
-                          key={`cat-cell-${entry.category}`}
+                          key={`cell-${entry.category}`}
                           fill={
-                            CATEGORY_COLORS[entry.category] ||
+                            CATEGORY_META[entry.category]?.color ||
                             PALETTE[idx % PALETTE.length]
                           }
                         />
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => [formatAmount(value), "Total"]}
+                      content={<CustomChartTooltip />}
+                      formatter={(val) => [formatAmount(val), "Total"]}
                     />
                     <Legend
                       verticalAlign="bottom"
                       iconType="circle"
                       wrapperStyle={{
-                        paddingTop: "10px",
+                        paddingTop: "12px",
                         fontSize: "0.8rem",
                       }}
                     />
@@ -364,17 +492,21 @@ const Reports = () => {
             </div>
           </div>
 
-          {/* 3. Monthly Report */}
-          <div className="report-section">
-            <h2 className="section-title">Monthly Spending Report</h2>
-            <p className="section-subtitle">
-              Recent monthly spending history (latest 6 recorded months)
-            </p>
+          {/* 3. Monthly Spending Report (Table + Bar Chart) */}
+          <div className="report-section-card">
+            <div className="report-section-header">
+              <div>
+                <h2 className="section-title">Monthly Spending Report</h2>
+                <p className="section-subtitle">
+                  Historical spending totals for recent recorded months
+                </p>
+              </div>
+            </div>
 
-            <div className="report-two-col">
+            <div className="report-split-grid">
               {/* Monthly Table */}
-              <div className="table-responsive">
-                <table className="report-table">
+              <div className="report-table-wrapper">
+                <table className="saas-table">
                   <thead>
                     <tr>
                       <th>Month</th>
@@ -386,10 +518,10 @@ const Reports = () => {
                     {monthlyReport.map((m) => (
                       <tr key={m.key}>
                         <td>
-                          <strong>{m.month}</strong>
+                          <span className="font-semibold">{m.month}</span>
                         </td>
-                        <td className="text-center">{m.count}</td>
-                        <td className="text-right font-bold">
+                        <td className="text-center text-muted">{m.count}</td>
+                        <td className="text-right font-bold text-primary-color">
                           {formatAmount(m.totalSpending)}
                         </td>
                       </tr>
@@ -398,9 +530,9 @@ const Reports = () => {
                 </table>
               </div>
 
-              {/* Monthly Bar Chart */}
+              {/* Monthly Trend Bar Chart */}
               <div className="report-chart-box">
-                <h4 className="chart-box-title">Monthly Trend</h4>
+                <h3 className="chart-box-title">Monthly Spending Trend</h3>
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart
                     data={monthlyReport}
@@ -409,26 +541,31 @@ const Reports = () => {
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
-                      stroke="#e2e8f0"
+                      stroke="#f1f5f9"
                     />
                     <XAxis
                       dataKey="month"
-                      tick={{ fontSize: 12, fill: "#4a5568" }}
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={{ stroke: "#e2e8f0" }}
+                      tickLine={false}
                     />
                     <YAxis
-                      tick={{ fontSize: 12, fill: "#4a5568" }}
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
                       tickFormatter={(val) =>
                         val >= 1000 ? `₹${Math.round(val / 1000)}k` : `₹${val}`
                       }
                     />
                     <Tooltip
-                      formatter={(value) => [formatAmount(value), "Spent"]}
+                      content={<CustomChartTooltip />}
+                      formatter={(val) => [formatAmount(val), "Spent"]}
                     />
                     <Bar
                       dataKey="totalSpending"
-                      fill="#1a7a4a"
+                      fill="#10b981"
                       radius={[6, 6, 0, 0]}
-                      maxBarSize={45}
+                      maxBarSize={44}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -437,21 +574,21 @@ const Reports = () => {
           </div>
 
           {/* 4. Report Page Expense Table */}
-          <div className="report-section">
-            <div className="section-header-row">
+          <div className="report-section-card">
+            <div className="report-section-header">
               <div>
                 <h2 className="section-title">Expense Transactions</h2>
                 <p className="section-subtitle">
-                  All expenses used to compile this report (sorted newest first)
+                  Complete list of transactions used for this report (newest first)
                 </p>
               </div>
-              <span className="badge-count">
+              <span className="table-records-badge">
                 {tableExpenses.length} Records
               </span>
             </div>
 
-            <div className="table-responsive">
-              <table className="report-table">
+            <div className="table-responsive-container">
+              <table className="saas-table">
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -461,25 +598,43 @@ const Reports = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tableExpenses.map((exp) => (
-                    <tr key={exp.id}>
-                      <td className="text-muted">{formatDate(exp.date)}</td>
-                      <td>
-                        <strong>{exp.title}</strong>
-                        {exp.description && (
-                          <div className="table-desc">{exp.description}</div>
-                        )}
-                      </td>
-                      <td>
-                        <span className="expense-category-badge">
-                          {exp.category}
-                        </span>
-                      </td>
-                      <td className="text-right font-bold">
-                        {formatAmount(exp.amount)}
-                      </td>
-                    </tr>
-                  ))}
+                  {tableExpenses.map((exp) => {
+                    const meta =
+                      CATEGORY_META[exp.category] || CATEGORY_META.Other;
+                    return (
+                      <tr key={exp.id}>
+                        <td className="text-muted table-date-cell">
+                          {formatDate(exp.date)}
+                        </td>
+                        <td>
+                          <div className="table-title-cell">
+                            <span className="table-title-text font-semibold">
+                              {exp.title}
+                            </span>
+                            {exp.description && (
+                              <span className="table-desc-text">
+                                {exp.description}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            className="expense-category-badge"
+                            style={{
+                              backgroundColor: meta.bg,
+                              color: meta.color,
+                            }}
+                          >
+                            {exp.category}
+                          </span>
+                        </td>
+                        <td className="text-right font-bold table-amount-cell">
+                          {formatAmount(exp.amount)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

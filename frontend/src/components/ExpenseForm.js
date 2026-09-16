@@ -28,7 +28,8 @@ const ExpenseForm = ({ initialData, onSubmit, onCancel, submitting }) => {
     if (initialData) {
       setFormData({
         title: initialData.title || "",
-        amount: initialData.amount !== undefined ? String(initialData.amount) : "",
+        amount:
+          initialData.amount !== undefined ? String(initialData.amount) : "",
         category: initialData.category || "",
         description: initialData.description || "",
         date: initialData.date
@@ -50,18 +51,18 @@ const ExpenseForm = ({ initialData, onSubmit, onCancel, submitting }) => {
   const validate = () => {
     const newErrors = {};
     if (!formData.title.trim()) {
-      newErrors.title = "Title is required.";
+      newErrors.title = "Please enter an expense title.";
     }
     if (formData.amount === "" || formData.amount === null) {
-      newErrors.amount = "Amount is required.";
+      newErrors.amount = "Please specify an amount.";
     } else if (isNaN(Number(formData.amount)) || Number(formData.amount) < 0) {
-      newErrors.amount = "Amount must be a number greater than or equal to 0.";
+      newErrors.amount = "Amount must be a valid number (0 or greater).";
     }
     if (!formData.category) {
-      newErrors.category = "Category is required.";
+      newErrors.category = "Please select an expense category.";
     }
     if (!formData.date) {
-      newErrors.date = "Date is required.";
+      newErrors.date = "Please select a date.";
     }
     return newErrors;
   };
@@ -84,45 +85,91 @@ const ExpenseForm = ({ initialData, onSubmit, onCancel, submitting }) => {
 
   return (
     <form className="expense-form" onSubmit={handleSubmit} noValidate>
+      {/* Title Field */}
       <div className="form-group">
-        <label htmlFor="title">Title <span className="required">*</span></label>
+        <label htmlFor="form-title" className="form-label">
+          Title <span className="required-indicator">*</span>
+        </label>
         <input
-          id="title"
+          id="form-title"
           name="title"
           type="text"
           value={formData.title}
           onChange={handleChange}
-          placeholder="e.g. Grocery shopping"
-          className={errors.title ? "input-error" : ""}
+          placeholder="e.g. Grocery shopping, Metro pass"
+          className={`form-input ${errors.title ? "input-has-error" : ""}`}
+          autoFocus={!initialData}
         />
-        {errors.title && <p className="field-error">{errors.title}</p>}
+        {errors.title && (
+          <p className="field-error-msg" role="alert">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {errors.title}
+          </p>
+        )}
       </div>
 
+      {/* Amount and Category Fields */}
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="amount">Amount (₹) <span className="required">*</span></label>
-          <input
-            id="amount"
-            name="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.amount}
-            onChange={handleChange}
-            placeholder="0.00"
-            className={errors.amount ? "input-error" : ""}
-          />
-          {errors.amount && <p className="field-error">{errors.amount}</p>}
+          <label htmlFor="form-amount" className="form-label">
+            Amount (₹) <span className="required-indicator">*</span>
+          </label>
+          <div className="input-currency-wrapper">
+            <span className="input-currency-prefix">₹</span>
+            <input
+              id="form-amount"
+              name="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={handleChange}
+              placeholder="0.00"
+              className={`form-input form-input-with-prefix ${
+                errors.amount ? "input-has-error" : ""
+              }`}
+            />
+          </div>
+          {errors.amount && (
+            <p className="field-error-msg" role="alert">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {errors.amount}
+            </p>
+          )}
         </div>
 
         <div className="form-group">
-          <label htmlFor="category">Category <span className="required">*</span></label>
+          <label htmlFor="form-category" className="form-label">
+            Category <span className="required-indicator">*</span>
+          </label>
           <select
-            id="category"
+            id="form-category"
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className={errors.category ? "input-error" : ""}
+            className={`form-select ${errors.category ? "input-has-error" : ""}`}
           >
             <option value="">Select a category</option>
             {CATEGORIES.map((cat) => (
@@ -131,41 +178,99 @@ const ExpenseForm = ({ initialData, onSubmit, onCancel, submitting }) => {
               </option>
             ))}
           </select>
-          {errors.category && <p className="field-error">{errors.category}</p>}
+          {errors.category && (
+            <p className="field-error-msg" role="alert">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {errors.category}
+            </p>
+          )}
         </div>
       </div>
 
+      {/* Date Field */}
       <div className="form-group">
-        <label htmlFor="date">Date <span className="required">*</span></label>
+        <label htmlFor="form-date" className="form-label">
+          Date <span className="required-indicator">*</span>
+        </label>
         <input
-          id="date"
+          id="form-date"
           name="date"
           type="date"
           value={formData.date}
           onChange={handleChange}
-          className={errors.date ? "input-error" : ""}
+          className={`form-input ${errors.date ? "input-has-error" : ""}`}
         />
-        {errors.date && <p className="field-error">{errors.date}</p>}
+        {errors.date && (
+          <p className="field-error-msg" role="alert">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {errors.date}
+          </p>
+        )}
       </div>
 
+      {/* Description Field */}
       <div className="form-group">
-        <label htmlFor="description">Description <span className="optional">(optional)</span></label>
+        <label htmlFor="form-description" className="form-label">
+          Description <span className="optional-badge">(optional)</span>
+        </label>
         <textarea
-          id="description"
+          id="form-description"
           name="description"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Add a note..."
+          placeholder="Add optional context or notes..."
           rows={3}
+          className="form-textarea"
         />
       </div>
 
+      {/* Action Buttons */}
       <div className="form-actions">
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onCancel}
+          disabled={submitting}
+        >
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? "Saving..." : initialData ? "Update Expense" : "Add Expense"}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={submitting}
+        >
+          {submitting ? (
+            <>
+              <span className="btn-spinner" aria-hidden="true"></span>
+              <span>Saving...</span>
+            </>
+          ) : initialData ? (
+            "Update Expense"
+          ) : (
+            "Add Expense"
+          )}
         </button>
       </div>
     </form>

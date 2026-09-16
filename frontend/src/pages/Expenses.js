@@ -191,33 +191,112 @@ const Expenses = () => {
   }, [expenses, search, category, month, sort]);
 
   return (
-    <div className="expenses-page">
-      {/* Header */}
-      <div className="page-header">
+    <div className="expenses-page-container">
+      {/* Page Header */}
+      <div className="expenses-page-header">
         <div>
-          <h1 className="page-title">My Expenses</h1>
-          <p className="page-subtitle">Track and manage all your expenses</p>
+          <h1 className="page-title">Expenses</h1>
+          <p className="page-subtitle">
+            Manage, search, and track all your logged expenses
+          </p>
         </div>
         <button className="btn btn-primary" onClick={openAddForm}>
-          + Add Expense
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>Add Expense</span>
         </button>
       </div>
 
+      {/* Global Error Banner */}
+      {error && !showForm && (
+        <div className="alert alert-error" role="alert">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Inline Form Modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={closeForm}>
+        <div
+          className="modal-overlay"
+          onClick={closeForm}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-heading"
+        >
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingExpense ? "Edit Expense" : "Add New Expense"}</h2>
+              <div>
+                <h2 id="modal-heading" className="modal-title">
+                  {editingExpense ? "Edit Expense" : "Add New Expense"}
+                </h2>
+                <p className="modal-subtitle">
+                  {editingExpense
+                    ? "Update the details of your recorded transaction."
+                    : "Fill in the details below to record a new expense."}
+                </p>
+              </div>
               <button
-                className="modal-close"
+                className="modal-close-btn"
                 onClick={closeForm}
-                aria-label="Close form"
+                aria-label="Close dialog"
               >
-                ✕
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
-            {formError && <p className="alert alert-error">{formError}</p>}
+
+            {formError && (
+              <div className="alert alert-error alert-sm" role="alert">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>{formError}</span>
+              </div>
+            )}
+
             <ExpenseForm
               initialData={editingExpense}
               onSubmit={handleSubmit}
@@ -228,33 +307,45 @@ const Expenses = () => {
         </div>
       )}
 
-      {/* Global error */}
-      {error && !showForm && <p className="alert alert-error">{error}</p>}
-
-      {/* Loading */}
+      {/* Loading State */}
       {loading && (
-        <div className="loading-state">
+        <div className="loading-state-card">
           <div className="spinner" />
-          <p>Loading expenses...</p>
+          <p>Loading your expenses...</p>
         </div>
       )}
 
-      {/* When user has no expenses at all */}
+      {/* Empty State when 0 expenses exist */}
       {!loading && !error && expenses.length === 0 && (
-        <div className="empty-state">
-          <span className="empty-icon">💸</span>
-          <h2>No expenses yet</h2>
-          <p>Start tracking your spending by adding your first expense.</p>
+        <div className="empty-state-card">
+          <div className="empty-icon-circle">💸</div>
+          <h2 className="empty-title">No expenses yet</h2>
+          <p className="empty-subtitle">
+            Start tracking your personal spending by adding your first expense.
+          </p>
           <button className="btn btn-primary" onClick={openAddForm}>
-            + Add Your First Expense
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>Add Your First Expense</span>
           </button>
         </div>
       )}
 
-      {/* Main content when expenses exist */}
+      {/* Main Content when expenses exist */}
       {!loading && expenses.length > 0 && (
         <>
-          {/* Search, Filter, and Sort Controls */}
+          {/* Search, Filter, and Sort Toolbar */}
           <ExpenseFilters
             search={search}
             onSearchChange={setSearch}
@@ -268,20 +359,33 @@ const Expenses = () => {
             hasActiveFilters={hasActiveFilters}
           />
 
-          {/* Result Count */}
-          <div className="results-header">
-            <p className="results-count">
-              Showing {filteredExpenses.length} of {expenses.length}{" "}
-              {expenses.length === 1 ? "expense" : "expenses"}
-            </p>
+          {/* Result Count and Active Filters Bar */}
+          <div className="results-status-bar">
+            <div className="results-count-pill">
+              <span>
+                Showing <strong>{filteredExpenses.length}</strong> of{" "}
+                <strong>{expenses.length}</strong>{" "}
+                {expenses.length === 1 ? "expense" : "expenses"}
+              </span>
+            </div>
+
+            {hasActiveFilters && (
+              <div className="active-filters-notice">
+                <span className="active-filter-indicator"></span>
+                <span>Filters Active</span>
+              </div>
+            )}
           </div>
 
-          {/* Empty state when filters yield no results */}
+          {/* Empty State when filters match 0 items */}
           {filteredExpenses.length === 0 ? (
-            <div className="empty-state empty-state-filtered">
-              <span className="empty-icon">🔍</span>
-              <h2>No expenses match your filters.</h2>
-              <p>Try adjusting your search terms or clearing your filters.</p>
+            <div className="empty-state-card empty-state-filtered">
+              <div className="empty-icon-circle">🔍</div>
+              <h2 className="empty-title">No expenses match your filters.</h2>
+              <p className="empty-subtitle">
+                Try refining your search keyword, changing the category, or
+                resetting your filters.
+              </p>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -292,7 +396,7 @@ const Expenses = () => {
             </div>
           ) : (
             /* Expense List */
-            <div className="expense-list">
+            <div className="expense-cards-list">
               {filteredExpenses.map((expense) => (
                 <ExpenseCard
                   key={expense.id}
